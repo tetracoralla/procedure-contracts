@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:openadam:procedure:brand-asset.prepare:v0.1:input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["source", "output", "width", "height", "brand_mark"],
+  "properties": {
+    "source": { "type": "string", "minLength": 1, "maxLength": 4096 },
+    "output": { "type": "string", "minLength": 1, "maxLength": 4096, "pattern": "\\.[Pp][Nn][Gg]$" },
+    "width": { "type": "integer", "minimum": 1, "maximum": 8192 },
+    "height": { "type": "integer", "minimum": 1, "maximum": 8192 },
+    "fit": { "enum": ["contain", "cover", "stretch"], "default": "contain" },
+    "trim": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "alpha_threshold": { "type": "integer", "minimum": 0, "maximum": 254, "default": 0 },
+        "padding": { "type": "integer", "minimum": 0, "maximum": 8192, "default": 0 }
+      }
+    },
+    "projective": { "$ref": "#/$defs/projective" },
+    "brand_mark": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1, "maxLength": 4096 },
+        "anchor": { "enum": ["top-left", "top-center", "top-right", "center-left", "center", "center-right", "bottom-left", "bottom-center", "bottom-right"], "default": "bottom-right" },
+        "margin_x": { "type": "integer", "minimum": 0, "maximum": 8192, "default": 32 },
+        "margin_y": { "type": "integer", "minimum": 0, "maximum": 8192, "default": 32 },
+        "opacity": { "type": "number", "minimum": 0, "maximum": 1, "default": 1 },
+        "max_width_ratio": { "type": "number", "exclusiveMinimum": 0, "maximum": 1, "default": 0.25 }
+      }
+    },
+    "overwrite": { "type": "boolean", "default": false }
+  },
+  "$defs": {
+    "point": { "type": "object", "additionalProperties": false, "required": ["x", "y"], "properties": { "x": { "type": "number" }, "y": { "type": "number" } } },
+    "quad": { "type": "object", "additionalProperties": false, "required": ["tl", "tr", "br", "bl"], "properties": { "tl": { "$ref": "#/$defs/point" }, "tr": { "$ref": "#/$defs/point" }, "br": { "$ref": "#/$defs/point" }, "bl": { "$ref": "#/$defs/point" } } },
+    "size": { "type": "object", "additionalProperties": false, "required": ["width", "height"], "properties": { "width": { "type": "number", "exclusiveMinimum": 0 }, "height": { "type": "number", "exclusiveMinimum": 0 } } },
+    "destination": {
+      "oneOf": [
+        { "type": "object", "additionalProperties": false, "required": ["space", "reference", "quad"], "properties": { "space": { "const": "pixel" }, "reference": { "$ref": "#/$defs/size" }, "quad": { "$ref": "#/$defs/quad" } } },
+        { "type": "object", "additionalProperties": false, "required": ["space", "quad"], "properties": { "space": { "const": "normalized" }, "quad": { "$ref": "#/$defs/quad" } } }
+      ]
+    },
+    "spec": { "type": "object", "additionalProperties": false, "required": ["schema", "version", "destination", "content"], "properties": { "schema": { "const": "projective.transform" }, "version": { "const": "0.1" }, "destination": { "$ref": "#/$defs/destination" }, "content": { "type": "object", "additionalProperties": false, "required": ["fit"], "properties": { "fit": { "const": "stretch" } } } } },
+    "projective": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["spec"],
+      "properties": {
+        "spec": { "$ref": "#/$defs/spec" },
+        "quality": { "enum": ["preview", "standard", "high"], "default": "standard" },
+        "canvas": { "enum": ["tight", "reference"], "default": "tight" }
+      }
+    }
+  }
+}

@@ -1,0 +1,80 @@
+{
+  "schemaVersion": "openadam.procedure-profile.v0.3",
+  "id": "org.openadam.package-dependency.change-preflight",
+  "version": "0.1.0",
+  "title": "Preflight a package dependency change",
+  "summary": "Inspect a dependency change, verify explicit target, public-surface, lockfile, and consumer-check evidence, then deterministically decide whether the change may land, remains blocked, or must be reverted.",
+  "lifecycle": "experimental",
+  "semantics": {
+    "resultVariability": "deterministic",
+    "contextSources": [],
+    "stateAccess": "none",
+    "idempotency": "idempotent"
+  },
+  "inputSchema": { "$ref": "./schemas/package-dependency.change-preflight.v0.1.input.schema.json" },
+  "outputSchema": { "$ref": "./schemas/package-dependency.change-preflight.v0.1.output.schema.json" },
+  "stages": [
+    {
+      "kind": "capability",
+      "id": "inspect-change",
+      "title": "Inspect dependency change",
+      "purpose": "Establish whether the dependency specification changed and classify both sides before accepting evidence about the target.",
+      "required": true,
+      "dependsOn": [],
+      "capability": { "id": "org.openadam.package-dependency.evaluate", "version": "0.1.0", "operationId": "inspect-change" }
+    },
+    {
+      "kind": "capability",
+      "id": "verify-target",
+      "title": "Verify installed target",
+      "purpose": "Check explicit presence and resolved-version evidence against the requested target without guessing unsupported source modes.",
+      "required": true,
+      "dependsOn": ["inspect-change"],
+      "capability": { "id": "org.openadam.package-dependency.evaluate", "version": "0.1.0", "operationId": "verify-target" }
+    },
+    {
+      "kind": "capability",
+      "id": "verify-surface",
+      "title": "Verify required public surface",
+      "purpose": "Ensure each caller-required package path remains present in the explicit observed surface.",
+      "required": true,
+      "dependsOn": ["inspect-change"],
+      "capability": { "id": "org.openadam.package-dependency.evaluate", "version": "0.1.0", "operationId": "verify-surface" }
+    },
+    {
+      "kind": "capability",
+      "id": "verify-lockfile",
+      "title": "Verify lockfile alignment",
+      "purpose": "Ensure the root specification and locked version both reflect the requested target.",
+      "required": true,
+      "dependsOn": ["inspect-change"],
+      "capability": { "id": "org.openadam.package-dependency.evaluate", "version": "0.1.0", "operationId": "verify-lockfile" }
+    },
+    {
+      "kind": "capability",
+      "id": "assess-consumer-check",
+      "title": "Assess consumer check",
+      "purpose": "Treat a named consumer check as verified, failed, or unavailable without inventing execution evidence.",
+      "required": true,
+      "dependsOn": ["inspect-change"],
+      "capability": { "id": "org.openadam.package-dependency.evaluate", "version": "0.1.0", "operationId": "assess-consumer-check" }
+    },
+    {
+      "kind": "capability",
+      "id": "evaluate-disposition",
+      "title": "Evaluate final disposition",
+      "purpose": "Combine the real-change flag and every required verification into stable blockers and a land, blocked, or revert disposition.",
+      "required": true,
+      "dependsOn": ["inspect-change", "verify-target", "verify-surface", "verify-lockfile", "assess-consumer-check"],
+      "capability": { "id": "org.openadam.package-dependency.evaluate", "version": "0.1.0", "operationId": "evaluate-disposition" }
+    }
+  ],
+  "completion": {
+    "description": "Completion requires a successful disposition result derived from the change classification and all four required evidence channels; land is valid only when blockers is empty.",
+    "outputStage": "evaluate-disposition"
+  },
+  "errors": [
+    { "code": "INVALID_INPUT", "description": "The Procedure request is outside the bounded canonical contract.", "retryable": false },
+    { "code": "PROVIDER_FAILED", "description": "A bound Capability provider or Procedure implementation failed safely.", "retryable": true }
+  ]
+}

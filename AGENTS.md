@@ -1,0 +1,33 @@
+# Procedure Contracts repository guidance
+
+Before any review, read `docs/REVIEW_CONTRACT.md`. A plain owner request to
+review, audit, 审核, or 复核 invokes that contract end to end; treat it as the
+minimum scope and report `tools-dev workspace escalations` without asking the
+owner for another checklist.
+
+This repository owns the provider-neutral Procedure standard: Procedure
+Profiles, implementation manifests, conformance suites, and the reference
+validator/runner. New contracts use the v0.3/v0.4/v0.3 family and return only a
+bounded result or error. The unpublished receipt and human-checkpoint formats
+were removed; do not recreate compatibility readers for them.
+
+Use the global `build-procedure-contracts` skill as the owning method. Use
+`build-capability-contracts` only for referenced Capability semantics and
+`build-agent-native-utilities` only for a concrete implementation product.
+
+It does not own capability provider business logic, workflow runtime syntax,
+Agent planning, approval policy, reviewer roles, a hosted registry,
+marketplace, or a universal intermediate representation. Do not add optional
+future fields without a current source-of-record consumer. Bind existing
+runtimes such as Open Workflow Specification instead of introducing a second
+orchestration language.
+
+Keep conformance executable against real implementation adapters. A fixture
+may test the runner, but it is not evidence that a production Procedure works.
+Do not commit, publish, deploy, or install without explicit owner
+authorization.
+
+The owner has frozen the 3D direction. Do not add 3D scene, primitive, recipe,
+renderer, Three.js/R3F, Scene Lab, `scene.create`, or `recipe.apply` Procedure
+contracts without a new explicit owner decision. The current visual procedures
+compose two-dimensional raster and projective Capabilities only.

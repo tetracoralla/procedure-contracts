@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:openadam:procedure:brand-asset.prepare:v0.1:output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["readiness", "output", "placement", "projective_applied"],
+  "properties": {
+    "readiness": { "const": "ready" },
+    "output": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "format", "width", "height", "bytes", "sha256"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1, "maxLength": 4096 },
+        "format": { "const": "png" },
+        "width": { "type": "integer", "minimum": 1 },
+        "height": { "type": "integer", "minimum": 1 },
+        "bytes": { "type": "integer", "minimum": 1 },
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      }
+    },
+    "placement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["anchor", "x", "y", "width", "height", "margin_x", "margin_y"],
+      "properties": {
+        "anchor": { "type": "string", "minLength": 1, "maxLength": 32 },
+        "x": { "type": "integer", "minimum": 0 },
+        "y": { "type": "integer", "minimum": 0 },
+        "width": { "type": "integer", "minimum": 1 },
+        "height": { "type": "integer", "minimum": 1 },
+        "margin_x": { "type": "integer", "minimum": 0 },
+        "margin_y": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "projective_applied": { "type": "boolean" }
+  }
+}

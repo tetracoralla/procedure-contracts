@@ -1,0 +1,44 @@
+{
+  "schemaVersion": "openadam.procedure-conformance-suite.v0.3",
+  "procedureId": "org.openadam.brand-asset.prepare",
+  "procedureVersion": "0.1.0",
+  "cases": [
+    {
+      "id": "prepare-without-projective",
+      "description": "Trims, resizes, and marks while explicitly skipping the optional projective stage.",
+      "input": { "source": "fixtures/padded.xpm", "output": "output/branded.png", "width": 12, "height": 8, "trim": { "padding": 0 }, "brand_mark": { "path": "fixtures/mark.xpm", "anchor": "bottom-right", "margin_x": 1, "margin_y": 1, "max_width_ratio": 0.5 }, "overwrite": true },
+      "expect": {
+        "result": "success",
+        "match": "subset",
+        "value": { "readiness": "ready", "output": { "path": "output/branded.png", "format": "png", "width": 12, "height": 8 }, "placement": { "anchor": "bottom-right", "x": 7, "y": 5, "width": 4, "height": 2, "margin_x": 1, "margin_y": 1 }, "projective_applied": false }
+      }
+    },
+    {
+      "id": "prepare-with-projective",
+      "description": "Runs the same workflow with one explicit identity ProjectiveSpec between trim and resize.",
+      "input": {
+        "source": "fixtures/padded.xpm",
+        "output": "output/branded-projective.png",
+        "width": 12,
+        "height": 8,
+        "projective": { "spec": { "schema": "projective.transform", "version": "0.1", "destination": { "space": "pixel", "reference": { "width": 4, "height": 4 }, "quad": { "tl": { "x": 0, "y": 0 }, "tr": { "x": 4, "y": 0 }, "br": { "x": 4, "y": 4 }, "bl": { "x": 0, "y": 4 } } }, "content": { "fit": "stretch" } }, "quality": "preview", "canvas": "tight" },
+        "brand_mark": { "path": "fixtures/mark.xpm", "anchor": "bottom-right", "margin_x": 1, "margin_y": 1, "max_width_ratio": 0.5 },
+        "overwrite": true
+      },
+      "expect": {
+        "result": "success",
+        "match": "subset",
+        "value": { "readiness": "ready", "output": { "path": "output/branded-projective.png", "width": 12, "height": 8 }, "projective_applied": true }
+      }
+    },
+    {
+      "id": "reject-empty-source",
+      "description": "Stops after trim when the source has no visible alpha pixels.",
+      "input": { "source": "fixtures/transparent.xpm", "output": "output/empty.png", "width": 12, "height": 8, "brand_mark": { "path": "fixtures/mark.xpm" } },
+      "expect": {
+        "result": "error",
+        "code": "TRIM_FAILED"
+      }
+    }
+  ]
+}

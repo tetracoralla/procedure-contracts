@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["dependency", "beforeSpec", "afterSpec", "changeState", "targetEvidence", "surfaceEvidence", "lockfileEvidence", "consumerCheck"],
+  "properties": {
+    "dependency": { "type": "string", "pattern": "^(?:@[a-z0-9][a-z0-9._-]*/)?[a-z0-9][a-z0-9._-]*$", "maxLength": 214 },
+    "beforeSpec": { "type": ["string", "null"], "minLength": 1, "maxLength": 300 },
+    "afterSpec": { "type": "string", "minLength": 1, "maxLength": 300 },
+    "changeState": { "enum": ["proposed", "applied"] },
+    "targetEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["packagePresent", "resolvedVersion"],
+      "properties": {
+        "packagePresent": { "type": "boolean" },
+        "resolvedVersion": { "type": ["string", "null"], "minLength": 1, "maxLength": 100 }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "packagePresent": { "const": false } }, "required": ["packagePresent"] },
+          "then": { "properties": { "resolvedVersion": { "const": null } } }
+        }
+      ]
+    },
+    "surfaceEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["requiredPaths", "availablePaths"],
+      "properties": {
+        "requiredPaths": { "$ref": "#/$defs/requiredPaths" },
+        "availablePaths": { "$ref": "#/$defs/availablePaths" }
+      }
+    },
+    "lockfileEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rootSpec", "lockedVersion"],
+      "properties": {
+        "rootSpec": { "type": ["string", "null"], "minLength": 1, "maxLength": 300 },
+        "lockedVersion": { "type": ["string", "null"], "minLength": 1, "maxLength": 100 }
+      }
+    },
+    "consumerCheck": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["checkId", "status"],
+      "properties": {
+        "checkId": { "type": "string", "pattern": "^[a-z0-9]+(?:[.-][a-z0-9]+)*$", "maxLength": 160 },
+        "status": { "enum": ["passed", "failed", "unavailable"] }
+      }
+    }
+  },
+  "$defs": {
+    "path": { "type": "string", "minLength": 1, "maxLength": 300, "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))[A-Za-z0-9._@+/-]+$" },
+    "requiredPaths": { "type": "array", "maxItems": 64, "uniqueItems": true, "items": { "$ref": "#/$defs/path" } },
+    "availablePaths": { "type": "array", "maxItems": 1024, "uniqueItems": true, "items": { "$ref": "#/$defs/path" } }
+  }
+}

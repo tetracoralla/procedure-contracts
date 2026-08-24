@@ -1,0 +1,5 @@
+node_modules/
+.openadam-conformance/
+.DS_Store
+coverage/
+*.log

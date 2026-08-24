@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["status", "dependency", "disposition", "complete", "blockers", "evidence"],
+  "properties": {
+    "status": { "const": "ok" },
+    "dependency": { "type": "string" },
+    "disposition": { "enum": ["land", "blocked", "revert"] },
+    "complete": { "const": true },
+    "blockers": { "type": "array", "maxItems": 7, "uniqueItems": true, "items": { "enum": ["NO_CHANGE", "TARGET_FAILED", "TARGET_UNVERIFIED", "SURFACE_FAILED", "LOCKFILE_FAILED", "CONSUMER_FAILED", "CONSUMER_UNVERIFIED"] } },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["changed", "targetVerification", "surfaceVerification", "lockfileVerification", "consumerVerification"],
+      "properties": {
+        "changed": { "type": "boolean" },
+        "targetVerification": { "enum": ["verified", "failed", "unverified"] },
+        "surfaceVerification": { "enum": ["verified", "failed"] },
+        "lockfileVerification": { "enum": ["verified", "failed"] },
+        "consumerVerification": { "enum": ["verified", "failed", "unverified"] }
+      }
+    }
+  }
+}

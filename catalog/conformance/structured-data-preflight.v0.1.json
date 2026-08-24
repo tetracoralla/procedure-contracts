@@ -1,0 +1,121 @@
+{
+  "schemaVersion": "openadam.procedure-conformance-suite.v0.3",
+  "procedureId": "org.openadam.structured-data.preflight",
+  "procedureVersion": "0.1.0",
+  "cases": [
+    {
+      "id": "inspect-without-constraints",
+      "description": "Confirms the file envelope and nested record set while explicitly skipping validation.",
+      "input": {
+        "path": "fixtures/users.json",
+        "sample_rows": 2,
+        "inspection": { "mode": "standard", "hash": "sha256" }
+      },
+      "expect": {
+        "result": "success",
+        "match": "subset",
+        "value": {
+          "readiness": "ready",
+          "file": {
+            "name": "users.json",
+            "media_type": "application/json",
+            "format": "JSON",
+            "confidence": "high",
+            "parseable": true,
+            "structured_format": "json"
+          },
+          "data": {
+            "source": { "format": "json" },
+            "shape": {
+              "kind": "tree",
+              "record_sets": [
+                {
+                  "path": "/data/users",
+                  "select": "data.users[*]",
+                  "selectable": true,
+                  "rows": 3,
+                  "columns": 3
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "constraints-pass",
+      "description": "Runs explicit record constraints and reports the source ready when they pass.",
+      "input": {
+        "path": "fixtures/users.json",
+        "select": "data.users[*]",
+        "sample_rows": 1,
+        "validation": {
+          "assertions": [
+            { "id": "id-required", "type": "not_null", "field": "userId" },
+            { "id": "id-unique", "type": "unique", "field": "userId" }
+          ]
+        }
+      },
+      "expect": {
+        "result": "success",
+        "match": "subset",
+        "value": {
+          "readiness": "ready",
+          "data": { "shape": { "kind": "table", "rows": 3, "columns": 3 } },
+          "validation": {
+            "valid": true,
+            "assertions": [
+              { "id": "id-required", "type": "not_null", "status": "passed" },
+              { "id": "id-unique", "type": "unique", "status": "passed" }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "constraints-fail",
+      "description": "Completes the Procedure and reports constraints-failed rather than treating a content failure as an execution error.",
+      "input": {
+        "path": "fixtures/users.json",
+        "select": "data.users[*]",
+        "sample_rows": 0,
+        "validation": {
+          "assertions": [
+            { "id": "age-required", "type": "not_null", "field": "age" }
+          ]
+        }
+      },
+      "expect": {
+        "result": "success",
+        "match": "subset",
+        "value": {
+          "readiness": "constraints-failed",
+          "validation": {
+            "valid": false,
+            "assertions": [
+              { "id": "age-required", "type": "not_null", "status": "failed" }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "reject-invalid-json",
+      "description": "Stops after file evidence proves the structured syntax is invalid.",
+      "input": { "path": "fixtures/invalid.json" },
+      "expect": {
+        "result": "error",
+        "code": "DATA_NOT_PARSEABLE"
+      }
+    },
+    {
+      "id": "reject-missing-file",
+      "description": "Stops at the first stage when the source does not exist.",
+      "input": { "path": "fixtures/missing.json" },
+      "expect": {
+        "result": "error",
+        "code": "SOURCE_NOT_FOUND"
+      }
+    }
+  ]
+}
