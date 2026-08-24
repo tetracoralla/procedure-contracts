@@ -2,12 +2,13 @@ import { createServer } from 'node:http'
 import { canonicalJson, deepSubset, parseJson } from './contracts.mjs'
 
 const maxBodyBytes = 1024 * 1024
+const publicMismatchMessage = 'Capability call did not match the active conformance case.'
 
-function failResponse(response, message) {
+function failResponse(response) {
   response.writeHead(409, { 'content-type': 'application/json' })
   response.end(JSON.stringify({
     ok: false,
-    error: { code: 'CONFORMANCE_CALL_MISMATCH', message },
+    error: { code: 'CONFORMANCE_CALL_MISMATCH', message: publicMismatchMessage },
   }))
 }
 
@@ -75,7 +76,7 @@ export async function createCompositionHarness({ profile, implementation }) {
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error)
       if (current !== undefined && current.failure === undefined) current.failure = new Error(message)
-      failResponse(response, message)
+      failResponse(response)
     }
   })
 
