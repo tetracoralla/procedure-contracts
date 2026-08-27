@@ -2,8 +2,10 @@
 
 ## Decision
 
-New Procedure contracts use Profile v0.3, Implementation Manifest v0.4,
-Conformance Suite v0.3, and Procedure JSONL v0.2.
+This document records the previous forward family: Profile v0.3,
+Implementation Manifest v0.4, Conformance Suite v0.3, and Procedure JSONL v0.2.
+New contracts use the
+[v0.4 conditional-composition family](procedure-conditional-composition-v0.4.md).
 
 This family removes generic human-checkpoint stages and portable execution
 receipts from the semantic waist. A Procedure is an ordered composition of

@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:openadam:schema:procedure-composition-suite:v0.2",
+  "title": "OpenAdam Procedure composition conformance suite v0.2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "procedureId", "procedureVersion", "claimLevel", "cases"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schemaVersion": { "const": "openadam.procedure-composition-suite.v0.2" },
+    "procedureId": { "$ref": "#/$defs/stableId" },
+    "procedureVersion": { "$ref": "#/$defs/semver" },
+    "claimLevel": { "enum": ["observed-composition", "conditional-composition"] },
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/case" }
+    }
+  },
+  "$defs": {
+    "stableId": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:[.-][a-z0-9]+)*$",
+      "maxLength": 160
+    },
+    "semver": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-((?:0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*)(?:\\.(?:0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*))*))?(?:\\+([0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*))?$"
+    },
+    "error": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "message"],
+      "properties": {
+        "code": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]*$", "maxLength": 100 },
+        "message": { "type": "string", "minLength": 1, "maxLength": 1000 }
+      }
+    },
+    "successResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ok", "result"],
+      "properties": {
+        "ok": { "const": true },
+        "result": true
+      }
+    },
+    "errorResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ok", "error"],
+      "properties": {
+        "ok": { "const": false },
+        "error": { "$ref": "#/$defs/error" }
+      }
+    },
+    "call": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["stageId", "input", "respond"],
+      "properties": {
+        "stageId": { "$ref": "#/$defs/stableId" },
+        "match": { "enum": ["exact", "subset"], "default": "exact" },
+        "input": true,
+        "respond": {
+          "oneOf": [
+            { "$ref": "#/$defs/successResponse" },
+            { "$ref": "#/$defs/errorResponse" }
+          ]
+        }
+      }
+    },
+    "case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "calls"],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableId" },
+        "calls": {
+          "type": "array",
+          "maxItems": 256,
+          "items": { "$ref": "#/$defs/call" }
+        }
+      }
+    }
+  }
+}

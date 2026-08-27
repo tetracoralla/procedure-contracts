@@ -1,4 +1,4 @@
-import { schemaDigest } from '../../src/lib/contracts.mjs'
+import { procedureProfileDigest, schemaDigest } from '../../src/lib/contracts.mjs'
 
 export const inputSchema = {
   type: 'object',
@@ -15,7 +15,7 @@ export const outputSchema = {
 }
 
 export const forwardProfile = {
-  schemaVersion: 'openadam.procedure-profile.v0.3',
+  schemaVersion: 'openadam.procedure-profile.v0.5',
   id: 'test.compose',
   version: '0.1.0',
   title: 'Compose a prepared value',
@@ -26,6 +26,7 @@ export const forwardProfile = {
     contextSources: [],
     stateAccess: 'none',
     idempotency: 'idempotent',
+    openWorld: false,
   },
   inputSchema,
   outputSchema,
@@ -59,12 +60,13 @@ export const forwardProfile = {
 }
 
 export const forwardManifest = {
-  schemaVersion: 'openadam.procedure-implementation-manifest.v0.4',
+  schemaVersion: 'openadam.procedure-implementation-manifest.v0.5',
   provider: { id: 'test.composition', name: 'Test composition', version: '0.1.0' },
   implementations: [
     {
       procedureId: forwardProfile.id,
       procedureVersion: forwardProfile.version,
+      profileDigest: await procedureProfileDigest(forwardProfile),
       adapter: {
         protocol: 'openadam.procedure-jsonl.v0.2',
         command: process.execPath,
@@ -114,16 +116,18 @@ export const errorCase = {
 }
 
 export const forwardSuite = {
-  schemaVersion: 'openadam.procedure-conformance-suite.v0.3',
+  schemaVersion: 'openadam.procedure-conformance-suite.v0.4',
   procedureId: forwardProfile.id,
   procedureVersion: forwardProfile.version,
+  claimLevel: 'result-boundary',
   cases: [successCase, errorCase],
 }
 
 export const compositionSuite = {
-  schemaVersion: 'openadam.procedure-composition-suite.v0.1',
+  schemaVersion: 'openadam.procedure-composition-suite.v0.2',
   procedureId: forwardProfile.id,
   procedureVersion: forwardProfile.version,
+  claimLevel: 'observed-composition',
   cases: [
     {
       id: 'composed-value',

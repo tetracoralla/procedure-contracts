@@ -71,6 +71,7 @@ function normalizedCapabilitySemantics(operation) {
     contextSources: semantics.context === 'runtime' ? ['runtime'] : [],
     stateAccess: semantics.sideEffects,
     idempotency: semantics.idempotent ? 'idempotent' : 'non-idempotent',
+    openWorld: true,
   }
 }
 
@@ -123,6 +124,15 @@ function assertSemanticCompatibility(procedure, references) {
       throw new Error(
         `${capabilityKey(procedure)} stage ${stage.id}: an idempotent Procedure `
         + 'requires idempotent Capability operations',
+      )
+    }
+    if (
+      procedureSemantics.openWorld === false
+      && capabilitySemantics.openWorld !== false
+    ) {
+      throw new Error(
+        `${capabilityKey(procedure)} stage ${stage.id}: closed-world Procedure `
+        + 'cannot include an open-world or unspecified Capability operation',
       )
     }
   }

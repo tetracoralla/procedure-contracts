@@ -7,7 +7,8 @@ owner for another checklist.
 
 This repository owns the provider-neutral Procedure standard: Procedure
 Profiles, implementation manifests, conformance suites, and the reference
-validator/runner. New contracts use the v0.3/v0.4/v0.3 family and return only a
+validator/runner. New contracts use Procedure Profile v0.5, result Suite v0.4,
+optional composition Suite v0.2, Manifest v0.5, and Procedure JSONL v0.2, and return only a
 bounded result or error. The unpublished receipt and human-checkpoint formats
 were removed; do not recreate compatibility readers for them.
 
