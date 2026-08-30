@@ -1,9 +1,10 @@
 # Procedure Contracts repository guidance
 
 Before any review, read `docs/REVIEW_CONTRACT.md`. A plain owner request to
-review, audit, 审核, or 复核 invokes that contract end to end; treat it as the
-minimum scope and report `tools-dev workspace escalations` without asking the
-owner for another checklist.
+review, audit, 审核, or 复核 invokes its minimum coverage plus an independent
+current-source discovery route; the contract is not a completion script.
+Report `tools-dev workspace escalations` without asking the owner for another
+checklist.
 
 This repository owns the provider-neutral Procedure standard: Procedure
 Profiles, implementation manifests, conformance suites, and the reference
