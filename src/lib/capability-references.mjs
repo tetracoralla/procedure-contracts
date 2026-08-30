@@ -61,10 +61,42 @@ const stateAccessRank = new Map([
   ['destructive', 3],
 ])
 
+const resultVariabilityValues = new Set(['deterministic', 'stochastic'])
+const contextSourceValues = new Set(['referenced-resource', 'runtime', 'ambient'])
+const idempotencyValues = new Set(['idempotent', 'non-idempotent', 'unverified'])
+
+function assertNormalizedSemantics(semantics, label, requireOpenWorld) {
+  if (!resultVariabilityValues.has(semantics.resultVariability)) {
+    throw new Error(`${label}: invalid or missing resultVariability`)
+  }
+  if (
+    !Array.isArray(semantics.contextSources)
+    || new Set(semantics.contextSources).size !== semantics.contextSources.length
+    || semantics.contextSources.some((source) => !contextSourceValues.has(source))
+  ) {
+    throw new Error(`${label}: invalid or missing contextSources`)
+  }
+  if (!stateAccessRank.has(semantics.stateAccess)) {
+    throw new Error(`${label}: invalid or missing stateAccess`)
+  }
+  if (!idempotencyValues.has(semantics.idempotency)) {
+    throw new Error(`${label}: invalid or missing idempotency`)
+  }
+  if (requireOpenWorld && typeof semantics.openWorld !== 'boolean') {
+    throw new Error(`${label}: invalid or missing openWorld`)
+  }
+  if (semantics.openWorld !== undefined && typeof semantics.openWorld !== 'boolean') {
+    throw new Error(`${label}: invalid openWorld`)
+  }
+}
+
 function normalizedCapabilitySemantics(operation) {
   const semantics = operation.semantics
-  if (semantics.resultVariability !== undefined) return semantics
-  return {
+  if (semantics.resultVariability !== undefined) {
+    assertNormalizedSemantics(semantics, `Capability operation ${operation.id} semantics`, true)
+    return semantics
+  }
+  const normalized = {
     resultVariability: semantics.determinism === 'probabilistic'
       ? 'stochastic'
       : 'deterministic',
@@ -73,9 +105,17 @@ function normalizedCapabilitySemantics(operation) {
     idempotency: semantics.idempotent ? 'idempotent' : 'non-idempotent',
     openWorld: true,
   }
+  assertNormalizedSemantics(normalized, `Capability operation ${operation.id} semantics`, true)
+  return normalized
 }
 
 function normalizedProcedureSemantics(procedure) {
+  const requireOpenWorld = procedure.schemaVersion === 'openadam.procedure-profile.v0.5'
+  assertNormalizedSemantics(
+    procedure.semantics,
+    `${capabilityKey(procedure)} Procedure semantics`,
+    requireOpenWorld,
+  )
   return procedure.semantics
 }
 

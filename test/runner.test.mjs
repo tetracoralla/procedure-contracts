@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { execFile } from 'node:child_process'
-import { mkdtemp, rm, writeFile } from 'node:fs/promises'
+import { mkdtemp, rm, symlink, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { resolve } from 'node:path'
 import { promisify } from 'node:util'
@@ -20,6 +20,7 @@ async function runWithSuite(
   testSuite = forwardSuite,
   testManifest = forwardManifest,
   testCompositionSuite,
+  options = {},
 ) {
   const temporary = await mkdtemp(resolve(tmpdir(), 'procedure-contracts-'))
   try {
@@ -35,6 +36,7 @@ async function runWithSuite(
         ? []
         : [writeFile(compositionSuitePath, JSON.stringify(testCompositionSuite))]),
     ])
+    await options.prepare?.(temporary)
     return await execFileAsync(
       process.execPath,
       [
@@ -42,7 +44,7 @@ async function runWithSuite(
         '--profile', profilePath,
         '--suite', suitePath,
         '--manifest', manifestPath,
-        '--implementation-root', repoRoot,
+        '--implementation-root', options.implementationRoot?.(temporary) ?? repoRoot,
         ...(testCompositionSuite === undefined
           ? []
           : ['--composition-suite', compositionSuitePath]),
@@ -121,4 +123,61 @@ test('terminates a hanging implementation at the case timeout', async () => {
       return true
     },
   )
+})
+
+test('rejects an adapter cwd that escapes the implementation root through a symlink', async () => {
+  const outside = await mkdtemp(resolve(tmpdir(), 'procedure-adapter-cwd-test-'))
+  const manifest = structuredClone(forwardManifest)
+  manifest.implementations[0].adapter.cwd = 'escaped-cwd'
+  try {
+    await assert.rejects(
+      runWithSuite(forwardSuite, manifest, undefined, {
+        prepare: (temporary) => symlink(outside, resolve(temporary, 'escaped-cwd')),
+        implementationRoot: (temporary) => temporary,
+      }),
+      (error) => {
+        assert.match(error.stderr, /implementation adapter cwd escapes the implementation root/)
+        return true
+      },
+    )
+  } finally {
+    await rm(outside, { recursive: true, force: true })
+  }
+})
+
+test('rejects unknown and duplicate conformance command-line flags', async () => {
+  const temporary = await mkdtemp(resolve(tmpdir(), 'procedure-cli-args-test-'))
+  try {
+    const profilePath = resolve(temporary, 'profile.json')
+    const suitePath = resolve(temporary, 'suite.json')
+    const manifestPath = resolve(temporary, 'manifest.json')
+    await Promise.all([
+      writeFile(profilePath, JSON.stringify(forwardProfile)),
+      writeFile(suitePath, JSON.stringify(forwardSuite)),
+      writeFile(manifestPath, JSON.stringify(forwardManifest)),
+    ])
+    const args = [
+      'src/run-conformance.mjs',
+      '--profile', profilePath,
+      '--suite', suitePath,
+      '--manifest', manifestPath,
+      '--implementation-root', repoRoot,
+    ]
+    await assert.rejects(
+      execFileAsync(process.execPath, [...args, '--profiel', profilePath], { cwd: repoRoot }),
+      (error) => {
+        assert.match(error.stderr, /Unknown --profiel/)
+        return true
+      },
+    )
+    await assert.rejects(
+      execFileAsync(process.execPath, [...args, '--suite', suitePath], { cwd: repoRoot }),
+      (error) => {
+        assert.match(error.stderr, /Duplicate --suite/)
+        return true
+      },
+    )
+  } finally {
+    await rm(temporary, { recursive: true, force: true })
+  }
 })

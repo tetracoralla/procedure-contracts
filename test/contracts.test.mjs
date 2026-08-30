@@ -1,4 +1,7 @@
 import assert from 'node:assert/strict'
+import { mkdir, mkdtemp, rm, symlink, writeFile } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import test from 'node:test'
 import {
@@ -14,6 +17,7 @@ import {
   loadJson,
   parseJson,
   procedureProfileDigest,
+  resolveProcedureSchemas,
   validateCompositionSuite,
   validateContractSet,
   validateDocument,
@@ -133,6 +137,25 @@ test('JSON loading rejects duplicate object keys', async () => {
     loadJson(fileURLToPath(new URL('./fixtures/duplicate-keys.json', import.meta.url))),
     /duplicate JSON object key value/,
   )
+})
+
+test('relative Procedure schemas cannot escape the profile directory through a symlink', async () => {
+  const root = await mkdtemp(resolve(tmpdir(), 'procedure-schema-path-test-'))
+  const profileRoot = resolve(root, 'profile')
+  const outsideSchema = resolve(root, 'outside-schema.json')
+  try {
+    await mkdir(profileRoot, { recursive: true })
+    await writeFile(outsideSchema, JSON.stringify(forwardProfile.inputSchema))
+    await symlink(outsideSchema, resolve(profileRoot, 'linked-schema.json'))
+    const linkedProfile = copy(forwardProfile)
+    linkedProfile.inputSchema = { $ref: './linked-schema.json' }
+    await assert.rejects(
+      resolveProcedureSchemas(linkedProfile, resolve(profileRoot, 'profile.json')),
+      /schema reference escapes the profile directory/,
+    )
+  } finally {
+    await rm(root, { recursive: true, force: true })
+  }
 })
 
 test('SemVer accepts build metadata and rejects empty prerelease identifiers', async () => {

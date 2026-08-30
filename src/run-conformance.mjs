@@ -7,6 +7,7 @@ import {
   deepSubset,
   loadJson,
   parseJson,
+  resolveContainedRealPath,
   validateAgainstSchema,
   validateCompositionSuite,
   validateContractSet,
@@ -18,6 +19,9 @@ const maxStderrBytes = 64 * 1024
 const shutdownTimeoutMs = 2000
 
 function parseArgs(argv) {
+  const allowed = new Set([
+    'profile', 'suite', 'manifest', 'implementation-root', 'composition-suite',
+  ])
   const values = new Map()
   for (let index = 0; index < argv.length; index += 2) {
     const flag = argv[index]
@@ -27,7 +31,10 @@ function parseArgs(argv) {
         'Usage: run-conformance.mjs --profile FILE --suite FILE --manifest FILE --implementation-root DIR',
       )
     }
-    values.set(flag.slice(2), value)
+    const name = flag.slice(2)
+    if (!allowed.has(name)) throw new Error(`Unknown --${name}`)
+    if (values.has(name)) throw new Error(`Duplicate --${name}`)
+    values.set(name, value)
   }
   for (const required of ['profile', 'suite', 'manifest', 'implementation-root']) {
     if (!values.has(required)) throw new Error(`Missing --${required}`)
@@ -108,11 +115,16 @@ async function main() {
   if (compositionSuite !== undefined) {
     await validateCompositionSuite({ profile, suite, compositionSuite })
   }
-  const implementationRoot = resolve(args.get('implementation-root'))
-  const adapterCwd = resolve(implementationRoot, validated.implementation.adapter.cwd ?? '.')
-  if (adapterCwd !== implementationRoot && !adapterCwd.startsWith(`${implementationRoot}/`)) {
-    throw new Error('implementation adapter cwd escapes the implementation root')
-  }
+  const implementationRootPath = resolve(args.get('implementation-root'))
+  const adapterCwdPath = resolve(
+    implementationRootPath,
+    validated.implementation.adapter.cwd ?? '.',
+  )
+  const { root: implementationRoot, path: adapterCwd } = await resolveContainedRealPath(
+    implementationRootPath,
+    adapterCwdPath,
+    'implementation adapter cwd escapes the implementation root',
+  )
 
   const compositionHarness = compositionSuite === undefined
     ? undefined

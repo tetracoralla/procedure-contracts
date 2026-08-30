@@ -123,3 +123,25 @@ test('a closed-world Procedure cannot hide an open-world Capability stage', () =
     procedures: [openWorldProcedure],
   }))
 })
+
+test('reference validation rejects incomplete semantics instead of inferring compatibility', () => {
+  const missingCapabilityEffect = structuredClone(capability)
+  delete missingCapabilityEffect.operations[0].semantics.stateAccess
+  assert.throws(
+    () => validateCapabilityReferences({
+      capabilities: [missingCapabilityEffect],
+      procedures: [procedure()],
+    }),
+    /Capability operation inspect semantics: invalid or missing stateAccess/,
+  )
+
+  const missingProcedureWorld = procedure()
+  delete missingProcedureWorld.semantics.openWorld
+  assert.throws(
+    () => validateCapabilityReferences({
+      capabilities: [capability],
+      procedures: [missingProcedureWorld],
+    }),
+    /Procedure semantics: invalid or missing openWorld/,
+  )
+})
