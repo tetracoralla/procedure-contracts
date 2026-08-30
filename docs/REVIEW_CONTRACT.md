@@ -1,5 +1,14 @@
 # Review contract
 
+This contract records durable Procedure claim boundaries and minimum coverage;
+it is not a fixed reasoning script or completion runway. Before applying the
+named checks, reconstruct the current Profile families, Capability references,
+implementation manifests, runners, completion semantics, and public claims from
+source and real adapters. Perform and report at least one independent discovery
+route derived from that model rather than from this file, test names, prior
+findings, or the changed-file list. Completing every item below cannot by itself
+end the review.
+
 Keep these acceptance lanes separate.
 
 ## Development regression
