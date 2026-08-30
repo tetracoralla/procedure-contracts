@@ -5,8 +5,40 @@ Keep these acceptance lanes separate.
 ## Development regression
 
 Schema validation, semantic cross-checks, runner negative tests, and package
-tests must pass from current source. Forward Profiles/Suites use v0.3 and
-Manifests use v0.4. Unsupported legacy document families must be rejected.
+tests must pass from current source. New Profiles use v0.5, result Suites use
+v0.4, composition Suites use v0.2, and Manifests use v0.5. Cataloged v0.3/v0.4
+Profile and Suite identities remain readable compatibility inputs; unsupported
+older families and new legacy-format catalog entries must be rejected.
+
+A cataloged or consumed Procedure `id@version` cannot be rewritten by a review.
+When causal order, conditional activation, completion, stable errors, effects,
+or result meaning changes, retain the old identity and publish a new Procedure
+version. Internal execution optimization may keep the version only when the
+complete declared method and public semantics remain unchanged.
+
+Every optional stage has one closed input-present/input-absent condition.
+`dependsOn` cannot point at a stage that may be absent; `afterIfExecuted` may
+name only an earlier conditional stage. Completion resolves to exactly one
+active stage for every conformance input. A fixed completion stage is required;
+branched completion uses complementary conditions, and an optional output stage
+uses the same condition as its branch.
+
+Every v0.5 Profile declares aggregate `openWorld`. A closed-world Procedure
+must be rejected when any referenced Capability operation is open-world or has
+no mechanically established value. Direct hosts must require `openWorld:
+false`; absence is not permission to assume a legacy Profile is closed-world.
+
+Legacy v0.3 free-text conditions remain readable for schema, result, and
+observed-call compatibility. Composition validation may verify declared stage
+identity, causal order, required-stage presence, completion, and failure stop,
+but must not interpret prose to claim which optional path was active.
+
+The implementation `profileDigest` binds the complete resolved Profile, not
+only input/output schemas. Result suites claim only `result-boundary`.
+Composition suites claim `observed-composition` or `conditional-composition`;
+the latter includes successful active and inactive paths for every conditional
+stage and covers every resulting activation signature in the portable success
+corpus.
 
 Checks must reject unknown Capability references, extra success/error envelope
 fields, provider binding drift, invalid causal order, and result/schema

@@ -6,9 +6,9 @@ source into this repository.
 
 | Procedure Profile | Current implementation | Capability providers | Current claim boundary |
 | --- | --- | --- | --- |
-| `org.openadam.structured-data.preflight@0.1.0` | development pilot | File Vitals and BatchTicket have independent public source | Result and harness-observed composition canary |
-| `org.openadam.brand-asset.prepare@0.1.0` | development pilot | development-only providers | Result and stage-binding conformance |
-| `org.openadam.package-dependency.change-preflight@0.1.0` | development pilot | development-only provider | Result and stage-binding conformance |
+| `org.openadam.structured-data.preflight@0.3.0` | development pilot | File Vitals and BatchTicket have independent public source | Active result and harness-observed composition canary; `0.1.0` and `0.2.0` retained as superseded catalog identities |
+| `org.openadam.brand-asset.prepare@0.3.0` | development pilot | development-only providers | Active result and stage-binding conformance; `0.1.0` and `0.2.0` retained as superseded catalog identities |
+| `org.openadam.package-dependency.change-preflight@0.2.0` | development pilot | development-only provider | Active result and stage-binding conformance; `0.1.0` retained as superseded catalog identity |
 
 Public Capability-provider source currently referenced by the first pilot:
 

@@ -33,9 +33,10 @@ spending an Agent turn to relay structured input.
 
 New Procedures use:
 
-- `openadam.procedure-profile.v0.3`;
-- `openadam.procedure-implementation-manifest.v0.4`;
-- `openadam.procedure-conformance-suite.v0.3`;
+- `openadam.procedure-profile.v0.5`;
+- `openadam.procedure-implementation-manifest.v0.5`;
+- `openadam.procedure-conformance-suite.v0.4`;
+- optional `openadam.procedure-composition-suite.v0.2`;
 - `openadam.procedure-jsonl.v0.2`.
 
 The forward format contains only Capability stages. Success is exactly
@@ -45,12 +46,15 @@ publication field. A business that needs one of those mechanisms must define
 that concrete current mechanism and have its owning system establish current
 authorization separately; this ABI does not reserve future fields for it.
 
-The earlier unpublished Profile, Suite, Manifest, Receipt, checkpoint, and
-JSONL formats were removed instead of becoming a compatibility burden. A
-self-authored execution record is not authority for a broader correctness,
-effect, or acceptance claim.
+Existing cataloged v0.3/v0.4 Profiles and result Suites remain readable only at
+their original semantic identities. They are not templates for new work and
+cannot be upgraded by changing their meaning in place. Earlier unpublished
+Profile, Suite, Manifest, Receipt, checkpoint, and JSONL families were removed
+instead of becoming a compatibility burden. A self-authored execution record
+is not authority for a broader correctness, effect, or acceptance claim.
 
-See [Procedure forward format v0.3](docs/migrations/procedure-forward-format-v0.3.md).
+See [Procedure conditional composition v0.4](docs/migrations/procedure-conditional-composition-v0.4.md)
+and [Procedure closed-world aggregation v0.5](docs/migrations/procedure-closed-world-v0.5.md).
 
 `src/validate-capability-refs.mjs` resolves every Procedure stage against an
 explicit Capability catalog and rejects unknown Capability versions or
@@ -99,11 +103,14 @@ live endpoint is healthy.
 The ABI is experimental. Three active micro-procedures currently exercise the
 workspace:
 
-- `org.openadam.structured-data.preflight@0.1.0`;
-- `org.openadam.brand-asset.prepare@0.1.0`;
-- `org.openadam.package-dependency.change-preflight@0.1.0`.
+- `org.openadam.structured-data.preflight@0.3.0`;
+- `org.openadam.brand-asset.prepare@0.3.0`;
+- `org.openadam.package-dependency.change-preflight@0.2.0`.
 
-All three use the forward family. Structured Data Preflight is the first
+All three retain their superseded catalog contracts so existing consumers do
+not receive changed conditions, completion, effect, or closed-world semantics
+under the same version. All active implementations use the forward family.
+Structured Data Preflight is the first
 harness-observed composition canary: portable cases establish result/error
 behavior; composition cases additionally establish the observed provider calls,
 their order, tested data flow, and failure propagation. Its declared stage
@@ -112,6 +119,16 @@ Provider Manifests. Brand Asset Prep and Dependency Preflight stage bindings
 also resolve against their current provider manifests. These checks do not
 force adoption or establish installed availability, observed composition, or
 professional correctness.
+
+## Versioning and evolution
+
+Once a Procedure `id@version` is cataloged or consumed, its method semantics
+are immutable. A reviewer may discover a safer causal graph, a more truthful
+completion rule, or stronger effect classification; those improvements create
+a new Procedure version and an explicit migration of manifests and consumers.
+Implementation scheduling, process reuse, batching, or internal refactoring may
+continue under the same version only when the declared stages, dependencies,
+completion, errors, effects, and public result meaning are conserved.
 
 Run all current implementations and their portable suites with:
 

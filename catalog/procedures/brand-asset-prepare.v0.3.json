@@ -1,0 +1,140 @@
+{
+  "schemaVersion": "openadam.procedure-profile.v0.5",
+  "id": "org.openadam.brand-asset.prepare",
+  "version": "0.3.0",
+  "title": "Prepare a branded raster asset",
+  "summary": "Trim transparent padding, optionally apply one explicit projective mapping, normalize dimensions, and place a caller-supplied brand or authorization mark.",
+  "lifecycle": "experimental",
+  "semantics": {
+    "resultVariability": "deterministic",
+    "contextSources": [
+      "referenced-resource"
+    ],
+    "stateAccess": "destructive",
+    "idempotency": "non-idempotent",
+    "openWorld": false
+  },
+  "inputSchema": {
+    "$ref": "./schemas/brand-asset.prepare.v0.1.input.schema.json"
+  },
+  "outputSchema": {
+    "$ref": "./schemas/brand-asset.prepare.v0.1.output.schema.json"
+  },
+  "stages": [
+    {
+      "kind": "capability",
+      "id": "trim-transparent",
+      "title": "Trim transparent padding",
+      "purpose": "Remove only transparent outer pixels before later geometry and sizing operations.",
+      "required": true,
+      "dependsOn": [],
+      "capability": {
+        "id": "org.openadam.raster.prepare",
+        "version": "0.2.0",
+        "operationId": "trim-transparent"
+      }
+    },
+    {
+      "kind": "capability",
+      "id": "render-projective",
+      "title": "Render explicit perspective",
+      "purpose": "Apply only a caller-supplied ProjectiveSpec after trimming and before final sizing.",
+      "required": false,
+      "condition": {
+        "inputPresent": "/projective"
+      },
+      "dependsOn": [
+        "trim-transparent"
+      ],
+      "capability": {
+        "id": "org.openadam.projective.transform",
+        "version": "0.2.0",
+        "operationId": "render"
+      }
+    },
+    {
+      "kind": "capability",
+      "id": "resize",
+      "title": "Normalize output dimensions",
+      "purpose": "Render the latest successful intermediate raster to the exact requested width and height using the explicit fit mode; when the optional projective stage runs, its output is the intermediate.",
+      "required": true,
+      "dependsOn": [
+        "trim-transparent"
+      ],
+      "afterIfExecuted": [
+        "render-projective"
+      ],
+      "capability": {
+        "id": "org.openadam.raster.prepare",
+        "version": "0.2.0",
+        "operationId": "resize"
+      }
+    },
+    {
+      "kind": "capability",
+      "id": "apply-brand-mark",
+      "title": "Apply supplied brand mark",
+      "purpose": "Place the caller-supplied logo or authorization mark using explicit anchor, margins, opacity, and maximum width.",
+      "required": true,
+      "dependsOn": [
+        "resize"
+      ],
+      "capability": {
+        "id": "org.openadam.raster.prepare",
+        "version": "0.2.0",
+        "operationId": "apply-brand-mark"
+      }
+    }
+  ],
+  "completion": {
+    "description": "The requested PNG exists at exact dimensions, preserves any explicit projective mapping, and contains the supplied mark at the reported placement.",
+    "outputStage": "apply-brand-mark"
+  },
+  "errors": [
+    {
+      "code": "INVALID_INPUT",
+      "description": "The Procedure input is outside the portable contract.",
+      "retryable": false
+    },
+    {
+      "code": "SOURCE_NOT_FOUND",
+      "description": "The source or mark does not exist in the granted workspace.",
+      "retryable": false
+    },
+    {
+      "code": "PATH_FORBIDDEN",
+      "description": "A path violates the explicit workspace grant.",
+      "retryable": false
+    },
+    {
+      "code": "TRIM_FAILED",
+      "description": "Transparent-bound trimming could not complete, including an all-transparent source.",
+      "retryable": false
+    },
+    {
+      "code": "PROJECTIVE_FAILED",
+      "description": "The supplied ProjectiveSpec or projective render failed.",
+      "retryable": false
+    },
+    {
+      "code": "RESIZE_FAILED",
+      "description": "Exact-dimension normalization could not complete.",
+      "retryable": false
+    },
+    {
+      "code": "MARK_FAILED",
+      "description": "The supplied mark could not be placed under the requested geometry.",
+      "retryable": false
+    },
+    {
+      "code": "OUTPUT_EXISTS",
+      "description": "The final output exists and overwrite was not authorized.",
+      "retryable": false
+    },
+    {
+      "code": "PROVIDER_FAILED",
+      "description": "A bound provider or adapter failed safely outside a more specific error.",
+      "retryable": true
+    }
+  ]
+}

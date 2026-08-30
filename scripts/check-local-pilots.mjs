@@ -35,7 +35,7 @@ const pilots = [
     implementationRoot: resolve(workspaceRoot, "structured-data-preflight"),
     implementationCheck: ["uv", ["run", "ruff", "check", "."]],
     secondaryCheck: ["uv", ["run", "pytest"]],
-    profile: "structured-data-preflight.v0.1.json",
+    profile: "structured-data-preflight.v0.3.json",
     manifest: "procedure/implementation-manifest.json",
     compositionSuite: "procedure/composition-conformance.json",
     capabilityManifests: [
@@ -48,7 +48,7 @@ const pilots = [
     implementationRoot: resolve(workspaceRoot, "brand-asset-prep"),
     implementationCheck: ["uv", ["run", "ruff", "check", "."]],
     secondaryCheck: ["uv", ["run", "pytest"]],
-    profile: "brand-asset-prepare.v0.1.json",
+    profile: "brand-asset-prepare.v0.3.json",
     manifest: "procedure/implementation-manifest.json",
     capabilityManifests: [
       resolve(workspaceRoot, "asset-prep/capabilities/provider.json"),
@@ -60,7 +60,7 @@ const pilots = [
     implementationRoot: resolve(workspaceRoot, "dependency-preflight"),
     implementationCheck: ["npm", ["run", "check"]],
     secondaryCheck: ["node", ["--test", "test/contract-alignment.test.mjs"]],
-    profile: "package-dependency-change-preflight.v0.1.json",
+    profile: "package-dependency-change-preflight.v0.2.json",
     manifest: "procedure/implementation-manifest.json",
     capabilityManifests: [
       resolve(workspaceRoot, "dependency-preflight/capabilities/provider.json")

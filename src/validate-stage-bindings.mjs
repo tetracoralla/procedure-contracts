@@ -5,6 +5,7 @@ import { loadJson, validateContractSet } from './lib/contracts.mjs'
 import { validateStageProviderBindings } from './lib/stage-bindings.mjs'
 
 function parseArgs(argv) {
+  const allowed = new Set(['--profile', '--suite', '--manifest', '--capability-manifest'])
   const values = new Map()
   const capabilityManifests = []
   for (let index = 0; index < argv.length; index += 2) {
@@ -16,8 +17,13 @@ function parseArgs(argv) {
         + '--capability-manifest FILE [--capability-manifest FILE ...]',
       )
     }
+    if (!allowed.has(flag)) throw new Error(`Unknown ${flag}`)
     if (flag === '--capability-manifest') capabilityManifests.push(value)
-    else values.set(flag.slice(2), value)
+    else {
+      const name = flag.slice(2)
+      if (values.has(name)) throw new Error(`Duplicate --${name}`)
+      values.set(name, value)
+    }
   }
   for (const required of ['profile', 'suite', 'manifest']) {
     if (!values.has(required)) throw new Error(`Missing --${required}`)

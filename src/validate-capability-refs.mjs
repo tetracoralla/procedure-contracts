@@ -21,6 +21,7 @@ function parseArgs(argv) {
         + '[--capability-catalog DIR] [--procedure-catalog DIR]',
       )
     }
+    if (values.has(option)) throw new Error(`Duplicate ${option}`)
     values.set(option, value)
   }
   return {

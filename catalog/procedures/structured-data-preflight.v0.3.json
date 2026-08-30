@@ -1,0 +1,125 @@
+{
+  "schemaVersion": "openadam.procedure-profile.v0.5",
+  "id": "org.openadam.structured-data.preflight",
+  "version": "0.3.0",
+  "title": "Preflight a structured-data file",
+  "summary": "Confirm the file envelope, inspect internal record structure, and optionally evaluate explicit constraints before a downstream transformation or import acts.",
+  "lifecycle": "experimental",
+  "semantics": {
+    "resultVariability": "deterministic",
+    "contextSources": [
+      "referenced-resource"
+    ],
+    "stateAccess": "read",
+    "idempotency": "idempotent",
+    "openWorld": false
+  },
+  "inputSchema": {
+    "$ref": "./schemas/structured-data.preflight.v0.1.input.schema.json"
+  },
+  "outputSchema": {
+    "$ref": "./schemas/structured-data.preflight.v0.1.output.schema.json"
+  },
+  "stages": [
+    {
+      "kind": "capability",
+      "id": "inspect-file",
+      "title": "Inspect file envelope",
+      "purpose": "Establish file identity, integrity, structured syntax, and evidence before a data parser acts.",
+      "required": true,
+      "dependsOn": [],
+      "capability": {
+        "id": "org.openadam.file.inspect",
+        "version": "0.1.0",
+        "operationId": "inspect"
+      }
+    },
+    {
+      "kind": "capability",
+      "id": "inspect-data",
+      "title": "Inspect records",
+      "purpose": "Describe the structured-data shape, record sets, field profiles, and bounded sample.",
+      "required": true,
+      "dependsOn": [
+        "inspect-file"
+      ],
+      "capability": {
+        "id": "org.openadam.structured-data.analyze",
+        "version": "0.1.0",
+        "operationId": "inspect"
+      }
+    },
+    {
+      "kind": "capability",
+      "id": "validate-data",
+      "title": "Evaluate constraints",
+      "purpose": "Evaluate only the explicit JSON Schema or assertions supplied by the caller.",
+      "required": false,
+      "condition": {
+        "inputPresent": "/validation"
+      },
+      "dependsOn": [
+        "inspect-data"
+      ],
+      "capability": {
+        "id": "org.openadam.structured-data.analyze",
+        "version": "0.1.0",
+        "operationId": "validate"
+      }
+    }
+  ],
+  "completion": {
+    "description": "The file is confirmed parseable structured data, its internal shape is returned, and any supplied constraints have a truthful pass/fail result.",
+    "branches": [
+      {
+        "when": {
+          "inputPresent": "/validation"
+        },
+        "outputStage": "validate-data"
+      },
+      {
+        "when": {
+          "inputAbsent": "/validation"
+        },
+        "outputStage": "inspect-data"
+      }
+    ]
+  },
+  "errors": [
+    {
+      "code": "INVALID_INPUT",
+      "description": "The Procedure input is outside the portable contract.",
+      "retryable": false
+    },
+    {
+      "code": "SOURCE_NOT_FOUND",
+      "description": "The requested source file does not exist in the granted workspace.",
+      "retryable": false
+    },
+    {
+      "code": "PATH_FORBIDDEN",
+      "description": "The source path violates the explicit workspace grant.",
+      "retryable": false
+    },
+    {
+      "code": "DATA_NOT_PARSEABLE",
+      "description": "File evidence does not establish parseable supported structured data.",
+      "retryable": false
+    },
+    {
+      "code": "DATA_INSPECTION_FAILED",
+      "description": "The structured-data provider could not inspect the source.",
+      "retryable": true
+    },
+    {
+      "code": "DATA_VALIDATION_FAILED",
+      "description": "The provider could not evaluate the supplied constraints.",
+      "retryable": true
+    },
+    {
+      "code": "PROVIDER_FAILED",
+      "description": "A bound provider or adapter failed safely outside a more specific error.",
+      "retryable": true
+    }
+  ]
+}

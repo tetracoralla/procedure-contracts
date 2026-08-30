@@ -12,6 +12,7 @@ const capability = {
       contextSources: ['referenced-resource'],
       stateAccess: 'read',
       idempotency: 'idempotent',
+      openWorld: false,
     },
   }],
 }
@@ -22,7 +23,7 @@ function procedure(reference = {
   operationId: 'inspect',
 }) {
   return {
-    schemaVersion: 'openadam.procedure-profile.v0.3',
+    schemaVersion: 'openadam.procedure-profile.v0.5',
     id: 'org.openadam.example.review',
     version: '0.1.0',
     semantics: {
@@ -30,6 +31,7 @@ function procedure(reference = {
       contextSources: ['referenced-resource'],
       stateAccess: 'read',
       idempotency: 'idempotent',
+      openWorld: false,
     },
     stages: [
       {
@@ -100,5 +102,46 @@ test('rejects variability, context, or idempotency claims contradicted by a Capa
   assert.throws(
     () => validateCapabilityReferences({ capabilities: [variable], procedures: [invalid] }),
     /requires idempotent Capability operations/,
+  )
+})
+
+test('a closed-world Procedure cannot hide an open-world Capability stage', () => {
+  const openWorldCapability = structuredClone(capability)
+  openWorldCapability.operations[0].semantics.openWorld = true
+  assert.throws(
+    () => validateCapabilityReferences({
+      capabilities: [openWorldCapability],
+      procedures: [procedure()],
+    }),
+    /closed-world Procedure cannot include an open-world or unspecified Capability operation/,
+  )
+
+  const openWorldProcedure = procedure()
+  openWorldProcedure.semantics.openWorld = true
+  assert.doesNotThrow(() => validateCapabilityReferences({
+    capabilities: [openWorldCapability],
+    procedures: [openWorldProcedure],
+  }))
+})
+
+test('reference validation rejects incomplete semantics instead of inferring compatibility', () => {
+  const missingCapabilityEffect = structuredClone(capability)
+  delete missingCapabilityEffect.operations[0].semantics.stateAccess
+  assert.throws(
+    () => validateCapabilityReferences({
+      capabilities: [missingCapabilityEffect],
+      procedures: [procedure()],
+    }),
+    /Capability operation inspect semantics: invalid or missing stateAccess/,
+  )
+
+  const missingProcedureWorld = procedure()
+  delete missingProcedureWorld.semantics.openWorld
+  assert.throws(
+    () => validateCapabilityReferences({
+      capabilities: [capability],
+      procedures: [missingProcedureWorld],
+    }),
+    /Procedure semantics: invalid or missing openWorld/,
   )
 })

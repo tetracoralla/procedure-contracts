@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:openadam:schema:procedure-conformance-suite:v0.4",
+  "title": "OpenAdam Procedure result conformance suite v0.4",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "procedureId", "procedureVersion", "claimLevel", "cases"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schemaVersion": { "const": "openadam.procedure-conformance-suite.v0.4" },
+    "procedureId": { "$ref": "#/$defs/stableId" },
+    "procedureVersion": { "$ref": "#/$defs/semver" },
+    "claimLevel": { "const": "result-boundary" },
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/case" }
+    }
+  },
+  "$defs": {
+    "stableId": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:[.-][a-z0-9]+)*$",
+      "maxLength": 160
+    },
+    "semver": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-((?:0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*)(?:\\.(?:0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*))*))?(?:\\+([0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*))?$"
+    },
+    "successExpectation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["result", "match"],
+      "properties": {
+        "result": { "const": "success" },
+        "match": { "enum": ["schema", "subset", "exact"] },
+        "value": true
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "match": { "enum": ["subset", "exact"] } }, "required": ["match"] },
+          "then": { "required": ["value"] }
+        }
+      ]
+    },
+    "errorExpectation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["result", "code"],
+      "properties": {
+        "result": { "const": "error" },
+        "code": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]*$", "maxLength": 100 },
+        "messageIncludes": { "type": "string", "minLength": 1, "maxLength": 300 }
+      }
+    },
+    "case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "description", "input", "expect"],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableId" },
+        "description": { "type": "string", "minLength": 1, "maxLength": 500 },
+        "input": true,
+        "expect": {
+          "oneOf": [
+            { "$ref": "#/$defs/successExpectation" },
+            { "$ref": "#/$defs/errorExpectation" }
+          ]
+        },
+        "timeoutMs": { "type": "integer", "minimum": 10, "maximum": 60000, "default": 10000 }
+      }
+    }
+  }
+}

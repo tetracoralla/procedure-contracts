@@ -17,10 +17,11 @@ Maintainers with the sibling Capability catalog and all implementation pilots
 may additionally run `npm run check:local-pilots`. That integration is not a
 prerequisite for an ordinary contribution.
 
-New contracts use the forward v0.3/v0.4/v0.3 family and the exact JSONL v0.2
-result/error envelopes. Add executable negative coverage for every repaired
-contract edge. Do not restore the unpublished receipt or human-checkpoint
-formats.
+New contracts use Procedure Profile v0.5, result Conformance Suite v0.4,
+optional Composition Suite v0.2, Implementation Manifest v0.5, and the exact
+JSONL v0.2 result/error envelopes. Add executable negative coverage for every
+repaired contract edge. Do not restore the unpublished receipt or
+human-checkpoint formats.
 
 Do not include credentials, private fixtures, generated reports, or local
 paths. Contributions are licensed under Apache-2.0 unless clearly stated

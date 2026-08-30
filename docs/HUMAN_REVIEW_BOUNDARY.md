@@ -8,7 +8,7 @@ prescriptive: payment, inventory, specialist review, regulatory approval, and a
 single owner judgment are different business mechanisms. A shared optional
 field would not make them equivalent or trustworthy.
 
-New Procedure Profiles therefore use v0.3 and contain only Capability stages.
+Current Procedure Profiles therefore use v0.5 and contain only Capability stages.
 They do not define reviewer roles, counts, order, identity, quorum, approval
 states, attestations, or pause/resume behavior. When a concrete current business
 process needs portable operations, those operations may become Capabilities and

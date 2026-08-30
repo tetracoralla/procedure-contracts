@@ -1,0 +1,160 @@
+{
+  "schemaVersion": "openadam.procedure-conformance-suite.v0.4",
+  "procedureId": "org.openadam.package-dependency.change-preflight",
+  "procedureVersion": "0.2.0",
+  "claimLevel": "result-boundary",
+  "cases": [
+    {
+      "id": "verified-proposal-may-land",
+      "description": "A real proposed registry-range change with all explicit evidence verified completes with land.",
+      "input": {
+        "dependency": "ajv",
+        "beforeSpec": "^8.17.1",
+        "afterSpec": "^8.20.0",
+        "changeState": "proposed",
+        "targetEvidence": {
+          "packagePresent": true,
+          "resolvedVersion": "8.20.0"
+        },
+        "surfaceEvidence": {
+          "requiredPaths": [
+            "dist/2020.js"
+          ],
+          "availablePaths": [
+            "dist/2020.js",
+            "package.json"
+          ]
+        },
+        "lockfileEvidence": {
+          "rootSpec": "^8.20.0",
+          "lockedVersion": "8.20.0"
+        },
+        "consumerCheck": {
+          "checkId": "npm-test",
+          "status": "passed"
+        }
+      },
+      "expect": {
+        "result": "success",
+        "match": "exact",
+        "value": {
+          "status": "ok",
+          "dependency": "ajv",
+          "disposition": "land",
+          "complete": true,
+          "blockers": [],
+          "evidence": {
+            "changed": true,
+            "targetVerification": "verified",
+            "surfaceVerification": "verified",
+            "lockfileVerification": "verified",
+            "consumerVerification": "verified"
+          }
+        }
+      }
+    },
+    {
+      "id": "stale-target-and-lockfile-block-proposal",
+      "description": "A proposed change whose installed target and lockfile remain on the previous range completes as blocked.",
+      "input": {
+        "dependency": "ajv",
+        "beforeSpec": "^8.17.1",
+        "afterSpec": "^8.20.0",
+        "changeState": "proposed",
+        "targetEvidence": {
+          "packagePresent": true,
+          "resolvedVersion": "8.17.1"
+        },
+        "surfaceEvidence": {
+          "requiredPaths": [
+            "dist/2020.js"
+          ],
+          "availablePaths": [
+            "dist/2020.js"
+          ]
+        },
+        "lockfileEvidence": {
+          "rootSpec": "^8.17.1",
+          "lockedVersion": "8.17.1"
+        },
+        "consumerCheck": {
+          "checkId": "npm-test",
+          "status": "passed"
+        }
+      },
+      "expect": {
+        "result": "success",
+        "match": "exact",
+        "value": {
+          "status": "ok",
+          "dependency": "ajv",
+          "disposition": "blocked",
+          "complete": true,
+          "blockers": [
+            "TARGET_FAILED",
+            "LOCKFILE_FAILED"
+          ],
+          "evidence": {
+            "changed": true,
+            "targetVerification": "failed",
+            "surfaceVerification": "verified",
+            "lockfileVerification": "failed",
+            "consumerVerification": "verified"
+          }
+        }
+      }
+    },
+    {
+      "id": "broken-applied-change-must-revert",
+      "description": "An applied change with a missing public path and failed consumer check completes as revert.",
+      "input": {
+        "dependency": "ajv",
+        "beforeSpec": "^8.17.1",
+        "afterSpec": "^8.20.0",
+        "changeState": "applied",
+        "targetEvidence": {
+          "packagePresent": true,
+          "resolvedVersion": "8.20.0"
+        },
+        "surfaceEvidence": {
+          "requiredPaths": [
+            "dist/2020.js",
+            "dist/jtd.js"
+          ],
+          "availablePaths": [
+            "dist/2020.js"
+          ]
+        },
+        "lockfileEvidence": {
+          "rootSpec": "^8.20.0",
+          "lockedVersion": "8.20.0"
+        },
+        "consumerCheck": {
+          "checkId": "npm-test",
+          "status": "failed"
+        }
+      },
+      "expect": {
+        "result": "success",
+        "match": "exact",
+        "value": {
+          "status": "ok",
+          "dependency": "ajv",
+          "disposition": "revert",
+          "complete": true,
+          "blockers": [
+            "SURFACE_FAILED",
+            "CONSUMER_FAILED"
+          ],
+          "evidence": {
+            "changed": true,
+            "targetVerification": "verified",
+            "surfaceVerification": "failed",
+            "lockfileVerification": "verified",
+            "consumerVerification": "failed"
+          }
+        }
+      }
+    }
+  ]
+}
