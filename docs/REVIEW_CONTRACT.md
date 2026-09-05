@@ -65,6 +65,12 @@ establish the claimed internal composition, observed side effects,
 professional method, or runtime benefit. Those require independent evidence
 scoped to the claim.
 
+The maintainer pilot must classify missing implementation or Capability source
+or a declared composition suite as `not_run` and exit incomplete. It must
+inventory missing inputs before execution, aggregate independent pilot
+failures, accept only explicit absolute source overrides, and must not use an
+installed Agent Host artifact to stand in for current-source conformance.
+
 ## Runtime human flow
 
 If a Procedure is exposed through a human application, verify that product in

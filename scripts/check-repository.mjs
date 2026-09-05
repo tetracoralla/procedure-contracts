@@ -56,7 +56,7 @@ if (
 if (packageJson.scripts?.['check:pilots'] || packageJson.scripts?.['validate:campaign-scope']) {
   throw new Error('internal campaign or ambiguous pilot commands must not be public entry points')
 }
-if (packageJson.scripts?.['check:local-pilots'] !== 'npm --prefix ../capability-contracts run check && npm run validate:capability-refs && node scripts/check-local-pilots.mjs') {
+if (packageJson.scripts?.['check:local-pilots'] !== 'node scripts/check-local-pilots.mjs') {
   throw new Error('maintainer integration must retain an explicit local-only entry point')
 }
 

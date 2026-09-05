@@ -137,9 +137,18 @@ npm run check:local-pilots
 ```
 
 That command is a maintainer-only workspace integration. It expects specific
-sibling implementation repositories, some of which are not independently
-public. It is not required for an ordinary contribution and does not establish
-installed-host availability, Agent routing, or professional correctness.
+sibling implementation products or private reference packages, some of which
+are not independently public. Every pilot accepts the explicit absolute
+source-root variables named by its missing-input report. Missing source is
+reported as `not_run` and makes the command incomplete. The Capability
+Contracts checkout can be supplied with
+`OPENADAM_CAPABILITY_CONTRACTS_SOURCE_ROOT`; all explicit roots must be
+absolute. The runner inventories every missing input, includes a declared
+composition suite in that inventory, and reports failures across independent
+pilots instead of stopping at the first one. An installed Host artifact is not
+substituted for current-source conformance. This route is not required for an
+ordinary contribution and does not establish installed-host availability,
+Agent routing, or professional correctness.
 
 ## Explicitly frozen direction
 

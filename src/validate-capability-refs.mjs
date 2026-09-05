@@ -5,6 +5,7 @@ import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { validateCapabilityReferences } from './lib/capability-references.mjs'
 import { parseJson } from './lib/contracts.mjs'
+import { resolvePilotRoot } from '../scripts/local-pilot-paths.mjs'
 
 const moduleRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const maxCatalogFiles = 1024
@@ -27,7 +28,10 @@ function parseArgs(argv) {
   return {
     capabilityCatalog: resolve(
       values.get('--capability-catalog')
-      ?? resolve(moduleRoot, '../capability-contracts/catalog/capabilities'),
+      ?? resolve(resolvePilotRoot(
+        resolve(moduleRoot, '..'), 'capability-contracts',
+        'OPENADAM_CAPABILITY_CONTRACTS_SOURCE_ROOT',
+      ), 'catalog/capabilities'),
     ),
     procedureCatalog: resolve(
       values.get('--procedure-catalog') ?? resolve(moduleRoot, 'catalog/procedures'),

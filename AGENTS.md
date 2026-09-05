@@ -1,10 +1,10 @@
 # Procedure Contracts repository guidance
 
-Before any review, read `docs/REVIEW_CONTRACT.md`. A plain owner request to
-review, audit, 审核, or 复核 invokes its minimum coverage plus an independent
-current-source discovery route; the contract is not a completion script.
-Report `tools-dev workspace escalations` without asking the owner for another
-checklist.
+For a requested review, read `docs/REVIEW_CONTRACT.md` within the requested
+scope and follow the relevant source and dependencies. It records known risks,
+not an exhaustive search plan. Report concrete cross-repository implications
+when found. Review is read-only unless fixes are also requested; this entrypoint
+does not dispatch another reviewer.
 
 This repository owns the provider-neutral Procedure standard: Procedure
 Profiles, implementation manifests, conformance suites, and the reference
